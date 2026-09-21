@@ -1,4 +1,4 @@
-ame: Compilar y publicar firmware
+name: Compilar y publicar firmware
 on:
   push:
     branches: [ main ]
