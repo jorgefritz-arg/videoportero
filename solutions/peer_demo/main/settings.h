@@ -1,10 +1,7 @@
 /* General settings
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
+   ⚠️ NO PONGAS DATOS REALES ACÁ: este archivo es público en GitHub.
+   Los valores los inyecta GitHub Actions al compilar, desde los Secrets
+   WIFI_SSID / WIFI_PASSWORD.
 */
 
 #pragma once
@@ -13,15 +10,8 @@
 extern "C" {
 #endif
 
-/**
- * @brief  Set for wifi ssid
- */
-#define WIFI_SSID     "XXXX"
-
-/**
- * @brief  Set for wifi password
- */
-#define WIFI_PASSWORD "XXXX"
+#define WIFI_SSID     "SE_INYECTA_POR_CI"
+#define WIFI_PASSWORD "SE_INYECTA_POR_CI"
 
 #ifdef __cplusplus
 }

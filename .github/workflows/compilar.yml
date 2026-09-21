@@ -1,0 +1,57 @@
+name: Compilar y publicar firmware
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      # Secretos privados -> headers generados solo en el runner
+      - name: Generar headers privados desde Secrets
+        run: |
+          printf '/* Generado por CI - no editar */\n#pragma once\n\n#define WIFI_SSID     "%s"\n#define WIFI_PASSWORD "%s"\n' \
+            "$WIFI_SSID" "$WIFI_PASSWORD" > solutions/videopuerto/main/settings.h
+          printf '/* Generado por CI - no editar */\n#pragma once\n\n#define TG_TOKEN "%s"\n#define TG_CHAT_ID "%s"\n#define DOORBELL_PEER_ID "%s"\n' \
+            "$TG_TOKEN" "$TG_CHAT_ID" "$PEER_ID" > solutions/videopuerto/main/secrets.h
+        env:
+          WIFI_SSID:     ${{ secrets.WIFI_SSID }}
+          WIFI_PASSWORD: ${{ secrets.WIFI_PASSWORD }}
+          TG_TOKEN:      ${{ secrets.TG_TOKEN }}
+          TG_CHAT_ID:    ${{ secrets.TG_CHAT_ID }}
+          PEER_ID:       ${{ secrets.DOORBELL_PEER_ID }}
+
+      - name: Compilar con ESP-IDF
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: v5.3
+          target: esp32s3
+          path: 'solutions/videopuerto'
+
+      - name: Leer version
+        id: ver
+        run: echo "v=$(tr -d '[:space:]' < solutions/videopuerto/version.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Preparar archivos
+        run: |
+          mkdir -p release
+          cp $(ls solutions/videopuerto/build/*.bin | head -1) release/videopuerto.bin
+          cp solutions/videopuerto/build/bootloader/bootloader.bin release/
+          cp solutions/videopuerto/build/partition_table/partition-table.bin release/
+          cp solutions/videopuerto/build/flash_args release/
+
+      - name: Publicar Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.v }}
+          name: Videoportero v${{ steps.ver.outputs.v }}
+          files: release/*
+          fail_on_unmatched_files: true
