@@ -35,15 +35,15 @@ jobs:
           esp_idf_version: v5.4
           target: esp32s3
           path: 'solutions/videopuerto'
-      - name: Diagnostico origen de CONFIG
+      - name: Diagnostico CONFIG
         if: failure()
         run: |
-          echo "===== 1) Codigo de IDF alrededor de build.cmake:610 ====="
-          sed -n '595,625p' /opt/esp/idf/tools/cmake/build.cmake
-          echo "===== 2) Quien contiene el check (repo + componentes descargados) ====="
-          grep -rnF 'ENV{CONFIG}' /app/jorgefritz-arg/videoportero/ 2>/dev/null | head -20 || echo "(no encontrado)"
-          echo "===== 3) Componentes descargados en este build ====="
-          ls /app/jorgefritz-arg/videoportero/solutions/videopuerto/managed_components/ 2>/dev/null || echo "(sin managed_components)"
+          echo "===== 1) El workflow tiene CONFIG en env? ====="
+          grep -n "CONFIG" .github/workflows/compilar.yml || echo "(no aparece)"
+          echo "===== 2) build.cmake de IDF v5.4: lineas 580-625 ====="
+          docker run --rm espressif/idf:v5.4 sed -n '580,625p' /opt/esp/idf/tools/cmake/build.cmake
+          echo "===== 3) Quien menciona 'Environment variable' en las tools de IDF ====="
+          docker run --rm espressif/idf:v5.4 bash -c "grep -rn 'Environment variable' /opt/esp/idf/tools/cmake/ | head -10"
       - name: Leer version
         id: ver
         run: echo "v=$(tr -d '[:space:]' < solutions/videopuerto/version.txt)" >> "$GITHUB_OUTPUT"
