@@ -30,7 +30,7 @@ jobs:
           PEER_ID:       ${{ secrets.DOORBELL_PEER_ID }}
 
        - name: Compilar
-        run: |
+         run: |
           docker run --rm -e CONFIG=1 \
             -v "$GITHUB_WORKSPACE:/project" \
             -w /project/solutions/videopuerto \
