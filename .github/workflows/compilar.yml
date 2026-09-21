@@ -1,8 +1,5 @@
 name: Compilar y publicar firmware
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+on: [push, workflow_dispatch]
 
 permissions:
   contents: write
@@ -15,22 +12,19 @@ jobs:
         with:
           submodules: recursive
 
-      # Secretos privados -> headers generados solo en el runner
-      - name: Generar headers privados desde Secrets
+      - name: Headers privados
         run: |
-          printf '/* Generado por CI - no editar */\n#pragma once\n\n#define WIFI_SSID     "%s"\n#define WIFI_PASSWORD "%s"\n' \
-            "$WIFI_SSID" "$WIFI_PASSWORD" > solutions/videopuerto/main/settings.h
-          printf '/* Generado por CI - no editar */\n#pragma once\n\n#define TG_TOKEN "%s"\n#define TG_CHAT_ID "%s"\n#define DOORBELL_PEER_ID "%s"\n' \
-            "$TG_TOKEN" "$TG_CHAT_ID" "$PEER_ID" > solutions/videopuerto/main/secrets.h
+          printf '#pragma once\n#define WIFI_SSID "%s"\n#define WIFI_PASSWORD "%s"\n' "$WIFI_SSID" "$WIFI_PASSWORD" > solutions/videopuerto/main/settings.h
+          printf '#pragma once\n#define TG_TOKEN "%s"\n#define TG_CHAT_ID "%s"\n#define DOORBELL_PEER_ID "%s"\n' "$TG_TOKEN" "$TG_CHAT_ID" "$PEER_ID" > solutions/videopuerto/main/secrets.h
         env:
-          WIFI_SSID:     ${{ secrets.WIFI_SSID }}
+          WIFI_SSID: ${{ secrets.WIFI_SSID }}
           WIFI_PASSWORD: ${{ secrets.WIFI_PASSWORD }}
-          TG_TOKEN:      ${{ secrets.TG_TOKEN }}
-          TG_CHAT_ID:    ${{ secrets.TG_CHAT_ID }}
-          PEER_ID:       ${{ secrets.DOORBELL_PEER_ID }}
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+          PEER_ID: ${{ secrets.DOORBELL_PEER_ID }}
 
-       - name: Compilar
-         run: |
+      - name: Compilar
+        run: |
           docker run --rm -e CONFIG=1 \
             -v "$GITHUB_WORKSPACE:/project" \
             -w /project/solutions/videopuerto \
@@ -39,27 +33,19 @@ jobs:
               . /opt/esp/idf/export.sh > /dev/null 2>&1
               idf.py build || {
                 echo "########## ERRORES EXACTOS ##########"
-                grep -h "error:" build/log/idf_py_stdout_output_* | sort -u | head -30
+                grep -h "error:" build/log/idf_py_stdout_output_* 2>/dev/null | sort -u | head -30
                 exit 1
               }
             '
 
-      - name: Leer version
-        id: ver
-        run: echo "v=$(tr -d '[:space:]' < solutions/videopuerto/version.txt)" >> "$GITHUB_OUTPUT"
-
-      - name: Preparar archivos
+      - name: Publicar Release
         run: |
           mkdir -p release
           cp $(ls solutions/videopuerto/build/*.bin | head -1) release/videopuerto.bin
           cp solutions/videopuerto/build/bootloader/bootloader.bin release/
           cp solutions/videopuerto/build/partition_table/partition-table.bin release/
           cp solutions/videopuerto/build/flash_args release/
-
-      - name: Publicar Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ steps.ver.outputs.v }}
-          name: Videoportero v${{ steps.ver.outputs.v }}
-          files: release/*
-          fail_on_unmatched_files: true
+          cd release
+          gh release create "v$(tr -d '[:space:]' < ../solutions/videopuerto/version.txt)" videopuerto.bin bootloader.bin partition-table.bin flash_args --title "Videoportero" --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
