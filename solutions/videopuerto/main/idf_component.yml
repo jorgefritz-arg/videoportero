@@ -24,3 +24,5 @@ dependencies:
   espressif/esp32-camera:
     git: https://github.com/espressif/esp32-camera.git
     version: v2.0.3
+  espressif/esp_video:
+    version: "==2.4.0"
