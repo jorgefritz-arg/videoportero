@@ -35,7 +35,15 @@ jobs:
           esp_idf_version: v5.4
           target: esp32s3
           path: 'solutions/videopuerto'
-
+      - name: Diagnostico origen de CONFIG
+        if: failure()
+        run: |
+          echo "===== 1) Codigo de IDF alrededor de build.cmake:610 ====="
+          sed -n '595,625p' /opt/esp/idf/tools/cmake/build.cmake
+          echo "===== 2) Quien contiene el check (repo + componentes descargados) ====="
+          grep -rnF 'ENV{CONFIG}' /app/jorgefritz-arg/videoportero/ 2>/dev/null | head -20 || echo "(no encontrado)"
+          echo "===== 3) Componentes descargados en este build ====="
+          ls /app/jorgefritz-arg/videoportero/solutions/videopuerto/managed_components/ 2>/dev/null || echo "(sin managed_components)"
       - name: Leer version
         id: ver
         run: echo "v=$(tr -d '[:space:]' < solutions/videopuerto/version.txt)" >> "$GITHUB_OUTPUT"
