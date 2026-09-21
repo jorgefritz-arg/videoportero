@@ -1,4 +1,4 @@
-# ==== Objetivo y memoria (modulo ESP32-S3-WROOM-1 N16R8: 16MB flash, 8MB PSRAM) ====
+# ==== Objetivo y memoria (N16R8: 16MB flash, 8MB PSRAM) ====
 CONFIG_IDF_TARGET="esp32s3"
 CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
 CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
@@ -10,8 +10,10 @@ CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
 CONFIG_FREERTOS_HZ=1000
 CONFIG_MBEDTLS_CERTIFICATE_BUNDLE=y
 CONFIG_COMPILER_OPTIMIZATION_PERF=y
-# ==== Tabla de particiones con OTA dual (obligatoria para actualizaciones) ====
+# GCC14: warnings nuevos en componentes externos NO tratan como error
+CONFIG_COMPILER_DISABLE_GCC12_WARNINGS=y
+# ==== Tabla de particiones con OTA dual ====
 CONFIG_PARTITION_TABLE_CUSTOM=y
 CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
-# ==== Rollback OTA: si el firmware nuevo falla, vuelve al anterior solo ====
+# ==== Rollback OTA ====
 CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
