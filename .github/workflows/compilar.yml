@@ -25,10 +25,10 @@ jobs:
 
       - name: Compilar
         run: |
-          docker run --rm -e CONFIG=1 \
+          docker run --rm -e CONFIG=1 -e CFLAGS="-Wno-error=format" \
             -v "$GITHUB_WORKSPACE:/project" \
             -w /project/solutions/videopuerto \
-            espressif/idf:release-v5.4 bash -c '
+            espressif/idf:v5.4.4 bash -c '
               git config --global --add safe.directory /project
               . /opt/esp/idf/export.sh > /dev/null 2>&1
               idf.py build || {
