@@ -32,8 +32,12 @@ jobs:
               git config --global --add safe.directory /project
               . /opt/esp/idf/export.sh > /dev/null 2>&1
               idf.py build || {
-                echo "########## ERRORES EXACTOS ##########"
-                grep -h "error:" build/log/idf_py_stdout_output_* 2>/dev/null | sort -u | head -30
+                echo "########## ULTIMAS 50 LINEAS DEL LOG (stderr) ##########"
+                tail -50 build/log/idf_py_stderr_output_* 2>/dev/null
+                echo "########## ULTIMAS 50 LINEAS DEL LOG (stdout) ##########"
+                tail -50 build/log/idf_py_stdout_output_* 2>/dev/null
+                echo "########## ERRORES DETECTADOS ##########"
+                grep -hE "error:|CMake Error|fatal error" build/log/idf_py_stderr_output_* build/log/idf_py_stdout_output_* 2>/dev/null | sort -u | head -40
                 exit 1
               }
             '
