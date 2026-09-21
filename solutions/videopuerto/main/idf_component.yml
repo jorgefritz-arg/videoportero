@@ -22,4 +22,5 @@ dependencies:
     version: "*"
     path: ../../../components/webrtc_utils
   espressif/esp32-camera:
-    version: "*"
+    git: https://github.com/espressif/esp32-camera.git
+    version: v2.0.3
