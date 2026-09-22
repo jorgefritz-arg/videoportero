@@ -1,0 +1,7 @@
+menu "Compat esp_video/esp_h264"
+
+config ESP_VIDEO_USE_CUSTOMIZED_ESP_H264_VERSION
+    bool
+    default n
+
+endmenu

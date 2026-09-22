@@ -1,6 +1,5 @@
 ## IDF Component Manager Manifest File
 dependencies:
-  ## Required IDF version
   idf:
     version: ">=5.0"
   espressif/esp_peer:
@@ -22,7 +21,8 @@ dependencies:
     version: "*"
     path: ../../../components/webrtc_utils
   espressif/esp32-camera:
-    git: https://github.com/espressif/esp32-camera.git
-    version: v2.0.3
+    version: "*"
   espressif/esp_video:
     version: "==2.4.0"
+  espressif/esp_h264:
+    version: "==1.4.1"
