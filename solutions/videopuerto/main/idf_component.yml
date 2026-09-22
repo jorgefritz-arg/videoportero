@@ -22,7 +22,5 @@ dependencies:
     path: ../../../components/webrtc_utils
   espressif/esp32-camera:
     version: "*"
-  espressif/esp_video:
-    version: "*"
   espressif/esp_h264:
-    version: "*"
+    version: "==1.3.0"
